@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Autotori Worker Dashboard</title>
+
+  <!-- tailwind css cdn -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- react & react dom core libraries -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  
+  <!-- babel compiler for jsx in browser -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 antialiased">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    // 1. worker offers view component
+    function WorkerOffers() {
+      const [offers, setOffers] = useState([
+        { 
+          id: 'OFF-101', 
+          carName: '2022 Mercedes-Benz C-Class', 
+          sellerName: 'Mikko', 
+          price: 34990, 
+          status: 'Pending', 
+          mileage: '38,500 km', 
+          location: 'Helsinki', 
+          image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=600&q=80' 
+        },
+        { 
+          id: 'OFF-102', 
+          carName: '2021 BMW 3 Series', 
+          sellerName: 'Sanna', 
+          price: 31500, 
+          status: 'Accepted', 
+          mileage: '45,200 km', 
+          location: 'Espoo', 
+          image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=600&q=80' 
+        }
+      ]);
+      const [selectedOffer, setSelectedOffer] = useState(null);
+
+      // handle offer review status action
+      const handleAction = (statusMessage) => {
+        alert(statusMessage);
+        setSelectedOffer(null);
+      };
+
+      return (
+        <div className="p-6 max-w-6xl mx-auto space-y-6">
+          {/* header bar */}
+          <div className="flex justify-between items-center bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">Autotori Worker Offers</h1>
+              <p className="text-xs text-gray-500 mt-0.5">Review and manage vehicle seller submissions</p>
+            </div>
+            <span className="bg-amber-100 text-amber-800 text-xs px-3 py-1 rounded-full font-semibold border border-amber-200">
+              Pending Review
+            </span>
+          </div>
+
+          {/* offers table */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-gray-50 border-b border-gray-200 text-xs font-semibold uppercase text-gray-600">
+                <tr>
+                  <th className="p-4">ID</th>
+                  <th className="p-4">Car</th>
+                  <th className="p-4">Seller</th>
+                  <th className="p-4">Price</th>
+                  <th className="p-4">Status</th>
+                  <th className="p-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 text-sm">
+                {offers.map((item) => (
+                  <tr key={item.id} className="hover:bg-gray-50 transition">
+                    <td className="p-4 font-mono font-medium text-gray-700">{item.id}</td>
+                    <td className="p-4 font-semibold text-gray-900">{item.carName}</td>
+                    <td className="p-4 text-gray-600">{item.sellerName}</td>
+                    <td className="p-4 font-bold text-blue-600">€{item.price.toLocaleString()}</td>
+                    <td className="p-4">
+                      <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                        {item.status}
+                      </span>
+                    </td>
+                    <td className="p-4 text-right">
+                      <button 
+                        onClick={() => setSelectedOffer(item)} 
+                        className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-3.5 py-1.5 rounded-lg transition"
+                      >
+                        Review Offer
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* offer details modal */}
+          {selectedOffer && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-xl max-w-lg w-full p-6 space-y-4 shadow-xl border border-gray-200">
+                <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                  <h3 className="font-bold text-gray-900">{selectedOffer.carName}</h3>
+                  <button 
+                    onClick={() => setSelectedOffer(null)}
+                    className="text-gray-400 hover:text-gray-600 text-lg font-bold"
+                  >
+                    ✕
+                  </button>
+                </div>
+                
+                <img 
+                  src={selectedOffer.image} 
+                  alt={selectedOffer.carName} 
+                  className="w-full h-44 object-cover rounded-lg border border-gray-100" 
+                />
+                
+                <div className="flex justify-between items-center text-sm pt-1">
+                  <span className="text-gray-500 font-medium">Offered Amount:</span>
+                  <span className="text-lg font-extrabold text-blue-600">€{selectedOffer.price.toLocaleString()}</span>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-3 border-t border-gray-100">
+                  <button 
+                    onClick={() => handleAction('Offer Rejected')} 
+                    className="bg-rose-600 hover:bg-rose-700 text-white text-xs font-medium px-4 py-2 rounded-lg transition"
+                  >
+                    Reject
+                  </button>
+                  <button 
+                    onClick={() => handleAction('Offer Accepted')} 
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium px-4 py-2 rounded-lg transition"
+                  >
+                    Accept
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // 2. worker appointments component
+    function WorkerAppointments() {
+      const [appointments] = useState([
+        { 
+          id: 'APT-301', 
+          sellerName: 'Mikko', 
+          carModel: '2022 Mercedes-Benz C-Class', 
+          date: '2026-09-10', 
+          timeSlot: '09:00 - 11:00', 
+          status: 'Scheduled' 
+        },
+        { 
+          id: 'APT-302', 
+          sellerName: 'Sanna', 
+          carModel: '2021 BMW 3 Series', 
+          date: '2026-09-10', 
+          timeSlot: '11:00 - 13:00', 
+          status: 'Completed' 
+        }
+      ]);
+
+      return (
+        <div className="p-6 max-w-6xl mx-auto space-y-6">
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+            <h1 className="text-xl font-bold text-gray-900">Inspection Appointments</h1>
+            <p className="text-xs text-gray-500 mt-0.5">Upcoming vehicle inspection schedules</p>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-gray-50 border-b border-gray-200 text-xs font-semibold uppercase text-gray-600">
+                <tr>
+                  <th className="p-4">Appt ID</th>
+                  <th className="p-4">Seller</th>
+                  <th className="p-4">Car Model</th>
+                  <th className="p-4">Time Slot</th>
+                  <th className="p-4">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 text-sm">
+                {appointments.map((apt) => (
+                  <tr key={apt.id} className="hover:bg-gray-50 transition">
+                    <td className="p-4 font-mono font-medium text-gray-700">{apt.id}</td>
+                    <td className="p-4 text-gray-700">{apt.sellerName}</td>
+                    <td className="p-4 font-semibold text-gray-900">{apt.carModel}</td>
+                    <td className="p-4 text-blue-600 font-medium">{apt.date} ({apt.timeSlot})</td>
+                    <td className="p-4">
+                      <span className={`px-2.5 py-1 text-xs font-medium rounded-full border ${
+                        apt.status === 'Completed' 
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                          : 'bg-blue-50 text-blue-700 border-blue-200'
+                      }`}>
+                        {apt.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    }
+
+    // 3. user profile component
+    function UserProfile() {
+      return (
+        <div className="p-6 max-w-xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 mt-8 space-y-5">
+          <div className="border-b border-gray-100 pb-3">
+            <h2 className="text-xl font-bold text-gray-900">User Profile</h2>
+            <p className="text-xs text-gray-500 mt-0.5">Autotori Worker Account Details</p>
+          </div>
+
+          <div className="space-y-4 text-sm">
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Full Name</label>
+              <input 
+                type="text"
+                disabled 
+                value="Ridhi" 
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-gray-800 focus:outline-none cursor-not-allowed" 
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Email Address</label>
+              <input 
+                type="email"
+                disabled 
+                value="ridhi@autotori.fi" 
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-gray-800 focus:outline-none cursor-not-allowed" 
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">User Role</label>
+              <input 
+                type="text"
+                disabled 
+                value="Worker / Seller" 
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-gray-800 focus:outline-none cursor-not-allowed" 
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // main layout & navigation component
+    function App() {
+      const [activeTab, setActiveTab] = useState('offers');
+
+      return (
+        <div className="min-h-screen pb-12">
+          {/* navigation bar */}
+          <nav className="bg-slate-900 text-white px-6 py-3.5 flex gap-3 justify-center sticky top-0 shadow-md z-40">
+            <button 
+              onClick={() => setActiveTab('offers')} 
+              className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
+                activeTab === 'offers' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+              }`}
+            >
+              1. Worker Offers
+            </button>
+
+            <button 
+              onClick={() => setActiveTab('appointments')} 
+              className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
+                activeTab === 'appointments' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+              }`}
+            >
+              2. Worker Appointments
+            </button>
+
+            <button 
+              onClick={() => setActiveTab('profile')} 
+              className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
+                activeTab === 'profile' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+              }`}
+            >
+              3. User Profile
+            </button>
+          </nav>
+
+          {/* active view routing */}
+          <main>
+            {activeTab === 'offers' && <WorkerOffers />}
+            {activeTab === 'appointments' && <WorkerAppointments />}
+            {activeTab === 'profile' && <UserProfile />}
+          </main>
+        </div>
+      );
+    }
+
+    // render app component
+    const rootElement = document.getElementById('root');
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(<App />);
+  </script>
+</body>
+</html>
